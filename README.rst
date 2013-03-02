@@ -12,6 +12,8 @@ Text.  dmr parses that, and outputs a better format for whatever
 purpose you want.  Check out an example at
 http://github.com/stpierre/resume
 
+Docs are at https://dmr.readthedocs.org/en/latest/
+
 Alternatives
 ============
 
