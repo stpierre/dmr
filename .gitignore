@@ -1,0 +1,14 @@
+build
+
+*.py[co]
+
+# vim
+*.swp
+*.swo
+
+# ctags
+tags
+TAGS
+
+# rope project metadata
+.ropeproject

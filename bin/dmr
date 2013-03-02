@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+""" dmr is Deduplicate My Resume.  Write your resume once in reST, convert
+it to other useful formats.
+
+This is the main dmr program.  See ``dmr --help`` for usage. """
+
+import sys
+import dmr.config
+import dmr.input
+from dmr.logger import logger
+
+
+def main():
+    config = dmr.config.parse()
+    output = config.output_class(dmr.input.parse(config.infile))
+    logger.debug("Writing output with %s" % output.__class__.__name__)
+    logger.info("Writing output to %s" % config.outfile.name)
+    config.outfile.write(output.output())
+
+
+if __name__ == "__main__":
+    sys.exit(main())

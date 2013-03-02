@@ -1,0 +1,60 @@
+{# This layout based on Adam Miller's resume at
+ # http://maxamillion.pagekite.me/resume.txt #}\
+{% python
+from textwrap import fill
+from itertools import chain
+WIDTH = 79
+%}\
+${contact.name}
+{% for line in chain(*contact[1:]) %}\
+${fill(line, WIDTH)}
+{% end %}\
+
+{% for section in sections %}\
+${fill(section.name + ":", WIDTH, subsequent_indent="    ")}
+{% choose %}\
+{% when section.type == "text" %}
+{% for paragraph in section %}\
+${fill(paragraph, WIDTH, initial_indent="  ", subsequent_indent="  ")}
+{% end %}\
+
+{% end %}\
+{% when section.type == "experience" %}
+{% for job in section %}\
+${fill(job.employer.name, WIDTH, initial_indent="  ",
+       subsequent_indent="    ")}
+{% for line in chain(*job.employer[1:]) %}\
+${fill(line, WIDTH, initial_indent="    ", subsequent_indent="      ")}
+{% end %}\
+{% if job.position %}\
+${fill("Position: %s" % job.position, WIDTH, initial_indent="  ",
+       subsequent_indent="    ")}
+{% end %}\
+${fill("%s - %s" % job.dates, WIDTH, initial_indent="  ",
+       subsequent_indent="    ")}
+{% for description in job %}\
+${fill(description, WIDTH, initial_indent="    - ",
+       subsequent_indent="      ")}
+{% end %}\
+
+{% end %}\
+{% end %}\
+{% when section.type == "list" %}
+{% for item in section %}\
+${fill(item, WIDTH, initial_indent="  - ", subsequent_indent="    ")}
+{% end %}\
+
+{% end %}
+{% when section.type == "references" %}
+{% for contact in section %}\
+{% for line in chain(*contact[1:]) %}\
+${fill(line, WIDTH, initial_indent="  ", subsequent_indent="    ")}
+{% end %}\
+
+{% end %}\
+{% end %}\
+{% end %}\
+{% end %}\
+{% if footer %}\
+${fill(footer, WIDTH)}
+{% end %}\

@@ -1,0 +1,165 @@
+%% This layout is based on Seth Holloway's template at
+%% http://sethholloway.com/blog/2011/06/24/my-latex-resume-template/
+{% python
+import re
+from itertools import chain
+%}
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+{% if footer %}
+\usepackage{fancyhdr}
+{% end %}
+
+% Better fonts
+\usepackage{mathptmx} % Times
+\usepackage[scaled=.90]{helvet}
+\usepackage{courier}
+
+\leftmargin=0.25in
+\oddsidemargin=0.25in
+\textwidth=6.0in
+\topmargin=-0.25in
+\textheight=9.25in
+
+\raggedright
+
+\pagenumbering{arabic}
+
+% DEFINITIONS FOR RESUME
+
+\newenvironment{changemargin}[2]{%
+  \begin{list}{}{%
+    \setlength{\topsep}{0pt}%
+    \setlength{\leftmargin}{#1}%
+    \setlength{\rightmargin}{#2}%
+    \setlength{\listparindent}{\parindent}%
+    \setlength{\itemindent}{\parindent}%
+    \setlength{\parsep}{\parskip}%
+  }%
+  \item[]}{\end{list}
+}
+
+\newcommand{\lineover}{
+        \begin{changemargin}{-0.05in}{-0.05in}
+                \vspace*{-8pt}
+                \hrulefill \\
+                \vspace*{-2pt}
+        \end{changemargin}
+}
+
+\newcommand{\header}[1]{
+        \begin{changemargin}{-0.5in}{-0.5in}
+                \scshape{#1}\\
+        \lineover
+        \end{changemargin}
+}
+
+\newenvironment{body} {
+        \vspace*{-16pt}
+        \begin{changemargin}{-0.25in}{-0.5in}
+  }
+        {\end{changemargin}
+}
+
+% providelength (provide a length variable and set default, if it is new)
+\providecommand*{\DUprovidelength}[2]{
+  \ifthenelse{\isundefined{#1}}{\newlength{#1}\setlength{#1}{#2}}{}
+}
+
+% lineblock environment
+\DUprovidelength{\DUlineblockindent}{2.5em}
+\ifthenelse{\isundefined{\DUlineblock}}{
+  \newenvironment{DUlineblock}[1]{%
+    \list{}{\setlength{\partopsep}{\parskip}
+            \addtolength{\partopsep}{\baselineskip}
+            \setlength{\topsep}{0pt}
+            \setlength{\itemsep}{0.15\baselineskip}
+            \setlength{\parsep}{0pt}
+            \setlength{\leftmargin}{#1}}
+    \raggedright
+  }
+  {\endlist}
+}{}
+
+% hyperlinks:
+\ifthenelse{\isundefined{\hypersetup}}{
+  \usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+  \urlstyle{same} % normal text font (alternatives: tt, rm, sf)
+}{}
+\hypersetup{
+  pdftitle={${contact.name}},
+}
+
+%%% Title Data
+\title{\phantomsection%
+  ${contact.name}%
+  \label{${re.sub(r'[^a-z]+', '-', contact.name.lower())}}}
+\author{${contact.name}}
+\date{}
+
+{% if footer %}
+\pagestyle{fancy}
+\fancyhf{} % unset header and footer
+\renewcommand{\headrulewidth}{0pt} % remove hrule from header
+\cfoot{\footnotesize ${footer}}
+\renewcommand\headheight{12pt}
+{% end %}
+
+% END RESUME DEFINITIONS
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Name
+\begin{center}
+  {\Large \scshape {${contact.name}}}\ \smallskip
+  {% for line in chain(*contact[1:]) %}
+    {${line}}\ \smallskip
+  {% end %}
+\end{center}
+
+{% for section in sections %}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\header{${section.name}}
+\begin{body}
+    \vspace{14pt}
+
+{% choose %}
+{% when section.type == "text" %}
+  {% for paragraph in section %}
+    ${paragraph}
+  {% end %}
+{% end %}
+{% when section.type == "experience" %}
+  {% for job in section %}
+    {% choose %}\
+    {% when job.position %}\textbf{${job.position}}, \emph{${job.employer.name}}{% end %}\
+    {% otherwise %}\textbf{${job.employer.name}}{% end %}\
+    {% end %} \hfill \emph{${job.start} - ${job.end}}\\
+    \vspace*{-4pt}
+    \begin{itemize} \itemsep -0pt  % reduce space between items
+    {% for description in job %}
+       \item ${description}
+    {% end %}
+    \end{itemize}
+  {% end %}
+{% end %}
+{% when section.type == "list" %}
+  ${"\n\medskip\n".join(section)}
+{% end %}
+{% when section.type == "references" %}
+  ${"\n\medskip\n".join(section)}
+{% end %}
+{% end %}
+
+\end{body}
+
+\smallskip
+
+{% end %}
+
+\end{document}
