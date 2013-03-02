@@ -8,11 +8,12 @@
  dmr: Deduplicate My Resume
 ============================
 
-dmr is **Deduplicate My Resume**.  It allows you to write your resume
-in `reStructuredText`_, a semi-structured format that looks fine as
-plain text, and can be rendered into many other formats.  It then
-provides tools to help you render it into other formats with a great
-degree of control over the format.
+`dmr <https://github.com/stpierre/dmr>`_ is **Deduplicate My Resume**.
+It allows you to write your resume in `reStructuredText`_, a
+semi-structured format that looks fine as plain text, and can be
+rendered into many other formats.  It then provides tools to help you
+render it into other formats with a great degree of control over the
+format.
 
 Contents:
 
