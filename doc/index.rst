@@ -27,7 +27,7 @@ Contents:
 .. note::
 
     Mostly coincidentally, ``dmr`` is also the username of `Dennis
-    Ritchie <http://en.wikipedia.org/wiki/Dennis_Ritchie>`.
+    Ritchie <http://en.wikipedia.org/wiki/Dennis_Ritchie>`_.
     Throughout these docs, I have used examples from Ritchie's own
     educational and work experience to illustrate use of dmr.  Like
     most computer geeks, I hold Ritchie in the highest esteem
