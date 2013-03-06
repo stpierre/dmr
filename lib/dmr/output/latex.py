@@ -14,4 +14,5 @@ __all__ = ["Latex"]
 class Latex(GenshiOutput):
     """ dmr output format to write LaTeX files using
     :class:`dmr.output.genshi.GenshiOutput`. """
+    name = "LaTeX"
     writer = Writer()

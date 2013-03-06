@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import copy
 import dmr.data
+import dmr.config
 from unittest import TestCase
 from docutils.utils import new_document
 from docutils.frontend import OptionParser
@@ -33,6 +33,10 @@ def job2dict(job):
                 position=job.position,
                 dates=tuple(job.dates),
                 description=job.description)
+
+
+def setup_module():
+    dmr.config._get_default_config("json")
 
 
 class TestContact(TestCase):

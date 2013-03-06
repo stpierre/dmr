@@ -1,7 +1,8 @@
 """ Input parsing routines for dmr. """
 
 import sys
-import dmr.data
+from dmr.config import config, parse_document_options
+from dmr.data import Document, child_by_class
 from dmr.logger import logger, fatal
 import docutils.nodes
 from docutils.utils import new_document
@@ -37,26 +38,34 @@ def parse(filehandle):
     except IOError:
         fatal("Could not parse %s: %s" % (filehandle.name, sys.exc_info()[1]))
 
-    if len(document.children) != 1:
-        fatal("Document must have exactly one top-level heading")
-
-    doc = dmr.data.Document(source=document)
-
-    top = document.children[0]
-    doc.contact = dmr.data.Contact.parse(top)
-
-    for data in top.children:
-        if not isinstance(data, docutils.nodes.Structural):
-            if not isinstance(data, (docutils.nodes.line_block,
-                                     docutils.nodes.Titular)):
-                logger.info("Skipping unknown node %s" % data)
-            continue
-
-        for sectiontype in dmr.data.sections:
-            if sectiontype.is_valid(data):
-                doc.append(sectiontype.parse(data))
-                break
+    top = None
+    options = dict()
+    for child in document.children:
+        if isinstance(child, docutils.nodes.Structural):
+            if top:
+                fatal("Document must have exactly one top-level heading")
+            top = child
+        elif isinstance(child, docutils.nodes.comment):
+            contents = child_by_class(child, docutils.nodes.Text)
+            if contents and contents.startswith("options"):
+                opts = contents.splitlines()
+                try:
+                    # see if this is a format-specific option block
+                    ofmt = opts[0].split("=")[1]
+                    logger.debug("Found document options for %s: %s" %
+                                 (ofmt, opts[1:]))
+                except IndexError:
+                    ofmt = None
+                    logger.debug("Found default document options: %s" %
+                                 opts[1:])
+                options[ofmt] = opts[1:]
         else:
-            logger.info("Skipping unknown section %s" %
-                        dmr.data.get_title(data))
+            logger.info("Skipping unknown node %s" % child)
+
+    for ofmt in [None, config.format]:
+        if ofmt in options:
+            parse_document_options(options[ofmt])
+
+    doc = Document.parse(top)
+    doc.source = document
     return doc

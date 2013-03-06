@@ -5,9 +5,19 @@
 __expose__ = False
 
 
+class ClassName(object):
+    """ This very simple descriptor class exists only to get the name
+    of the owner class.  This is used to set a sensible default
+    display name for output plugins. """
+
+    def __get__(self, inst, owner):
+        return owner.__name__
+
+
 class BaseOutput(object):
     """ Base dmr output class.  All dmr output format classes should
     inherit from this class. """
+    name = ClassName()
 
     def __init__(self, document):
         """

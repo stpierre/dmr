@@ -1,6 +1,17 @@
+.. options
+   exclude excludeme
+   exclude Exclude This Section
+.. options=json
+   exclude Exclude This Section in JSON
+   no-footer
+.. options=text
+   include Include This Section in Plain Text
+
 ================
  Testy O'Tester
 ================
+
+.. This comment will not be included in any output.
 
 | 1234 No. Such St.
 | Nowhere, XX 12345
@@ -54,6 +65,14 @@ May 2004 - May 2010
 
 * Had a job so cool that it required *markup*.
 
+Job That Will Be Excluded
+~~~~~~~~~~~~~~~~~~~~~~~~~
+May 2000 - May 2004
+
+.. group excludeme
+
+* This job will be excluded from output.
+
 Education
 =========
 
@@ -68,6 +87,16 @@ Related Skills and Activities
 
 * Really cool dude.
 * Doesn't afraid of anything.
+
+Exclude This Section
+====================
+
+This section will always be excluded.
+
+Exclude This Section in JSON
+============================
+
+This section will be excluded from JSON output.
 
 References
 ==========
@@ -84,3 +113,17 @@ Header with *Markup*
 ====================
 
 Nothing here.
+
+Include This Section in Plain Text
+==================================
+
+.. group excludeme
+
+This section will be included in plain text output.
+
+Exclude This Section By Group
+=============================
+
+.. group excludeme
+
+This section will also be excluded.

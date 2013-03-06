@@ -3,12 +3,13 @@
 
 import re
 import abc
+from dmr.config import config
 from dmr.logger import logger
 import docutils.nodes
 from collections import namedtuple, MutableSequence
 
 
-def _child_by_class(parent, nodecls):
+def child_by_class(parent, nodecls):
     """ Get the first child of ``parent`` that is a member of
     ``nodecls``.  This differs from
     :func:`docutils.node.Node.first_child_matching_class`, which only
@@ -46,6 +47,23 @@ def _contain(parent):
         return parent.children[0]
 
 
+def exclude(node):
+    """ Return True if the node should be skipped.
+
+    :param node: The node to check
+    :type node: docutils.nodes.Node
+    :returns: bool """
+    names = [get_title(node)]
+    for child in node.children:
+        if isinstance(child, docutils.nodes.comment):
+            contents = child_by_class(child, docutils.nodes.Text)
+            if contents.startswith("group "):
+                names.append(contents.split(None, 1)[-1])
+    # if title or group name is explicitly included, override all excludes
+    return (not any(n in config.include for n in names) and
+            any(n in config.exclude for n in names))
+
+
 def get_title(node):
     """ Given a :class:`docutils.nodes.Structural` node, get the
     content of the title of the section.
@@ -54,7 +72,7 @@ def get_title(node):
     :type node: docutils.nodes.Structural
     :returns: docutils.nodes.container
     """
-    return _contain(_child_by_class(node, docutils.nodes.Titular))
+    return _contain(child_by_class(node, docutils.nodes.Titular))
 
 
 class Renderable(object):
@@ -257,7 +275,7 @@ class Contact(ContactBase, RenderableNamedTuple, Parseable):
         else:
             name = get_title(node)
             logger.debug("Parsing address block for %s" % name)
-            block = _child_by_class(node, docutils.nodes.line_block)
+            block = child_by_class(node, docutils.nodes.line_block)
             if block is None:
                 return cls(name, [], [], [], [], [])
 
@@ -268,8 +286,10 @@ class Contact(ContactBase, RenderableNamedTuple, Parseable):
         url = []
         other = []
         for rawline in block.children:
+            if isinstance(rawline, docutils.nodes.comment):
+                continue
             line = _contain(rawline)
-            ref = _child_by_class(rawline, docutils.nodes.reference)
+            ref = child_by_class(rawline, docutils.nodes.reference)
             if not name:
                 name = line
                 logger.debug("Parsing address block for %s" % name)
@@ -430,13 +450,15 @@ class Job(MutableSequence, Renderable, Parseable):  # pylint: disable=R0901
             logger.debug("Parsing job %s at %s" % (position, employer))
 
         dates = Dates(None, None)
-        datenode = _child_by_class(node, docutils.nodes.paragraph)
+        datenode = child_by_class(node, docutils.nodes.paragraph)
         if datenode:
             dates = Dates.parse(datenode)
 
         job = cls(position=position, employer=employer, dates=dates)
-        for item in _child_by_class(node, docutils.nodes.bullet_list).children:
-            job.append(_child_by_class(item, docutils.nodes.paragraph))
+        for item in child_by_class(node, docutils.nodes.bullet_list).children:
+            if isinstance(item, docutils.nodes.comment):
+                continue
+            job.append(child_by_class(item, docutils.nodes.paragraph))
         return job
 
     def render(self, func):
@@ -511,7 +533,7 @@ class SectionType(object):
 
 class Section(list, Renderable, Parseable):
     """ Abstract representation of a resume section """
-    allowed_child_node_types = []
+    allowed_child_node_types = [docutils.nodes.comment]
     required_child_node_types = []
     type = SectionType()
 
@@ -584,12 +606,14 @@ class Text(Section):
         References Available Upon Request
         =================================
     """
-    allowed_child_node_types = [docutils.nodes.paragraph]
+    allowed_child_node_types = Section.allowed_child_node_types + \
+        [docutils.nodes.paragraph]
 
     @classmethod
     def parse(cls, node):
         section = super(Text, cls).parse(node)
-        section.extend(node.children[1:])
+        section.extend(c for c in node.children[1:]
+                       if not isinstance(c, docutils.nodes.comment))
         return section
 
 
@@ -705,9 +729,9 @@ class Experience(Section):
         * Dissertation: "Program Structure and Computational
           Complexity"
     """
-    allowed_child_node_types = [docutils.nodes.Structural,
-                                docutils.nodes.Titular,
-                                docutils.nodes.line_block]
+    allowed_child_node_types = Section.allowed_child_node_types + \
+        [docutils.nodes.Structural, docutils.nodes.Titular,
+         docutils.nodes.line_block]
     required_child_node_types = [docutils.nodes.Structural]
 
     def render(self, func):
@@ -717,10 +741,15 @@ class Experience(Section):
 
     @classmethod
     def parse(cls, node):
-        section = cls(get_title(node))
+        section = super(Experience, cls).parse(node)
         logger.debug("Parsing %s node %s" % (cls.type, section.name))
         for employernode in node.children:
             if not isinstance(employernode, docutils.nodes.Structural):
+                continue
+
+            if exclude(employernode):
+                logger.debug("Skipping excluded employer %s" %
+                             get_title(employernode))
                 continue
 
             # Two ways this could be structured:
@@ -734,10 +763,16 @@ class Experience(Section):
                 for jobnode in employernode.children:
                     if not isinstance(jobnode, docutils.nodes.Structural):
                         if not isinstance(jobnode, (docutils.nodes.line_block,
-                                                    docutils.nodes.Titular)):
+                                                    docutils.nodes.Titular,
+                                                    docutils.nodes.comment)):
                             logger.info("Skipping unknown node %s in job node"
                                         % jobnode)
                         continue
+                    if exclude(jobnode):
+                        logger.debug("Skipping excluded job %s" %
+                                     get_title(jobnode))
+                        continue
+
                     job = Job.parse(jobnode, employer=address)
                     section.append(job)
             else:
@@ -760,14 +795,15 @@ class List(Section):
         * No seriously.
         * Invented a lot of UNIX, too.
      """
-    allowed_child_node_types = [docutils.nodes.bullet_list]
+    allowed_child_node_types = Section.allowed_child_node_types + \
+        [docutils.nodes.bullet_list]
     required_child_node_types = [docutils.nodes.bullet_list]
 
     @classmethod
     def parse(cls, node):
         section = super(List, cls).parse(node)
-        for item in _child_by_class(node, docutils.nodes.bullet_list).children:
-            section.append(_child_by_class(item, docutils.nodes.paragraph))
+        for item in child_by_class(node, docutils.nodes.bullet_list).children:
+            section.append(child_by_class(item, docutils.nodes.paragraph))
         return section
 
 
@@ -788,7 +824,8 @@ class References(Section):
         | (908) 555-5555
         | dmr@lucent.com
     """
-    allowed_child_node_types = [docutils.nodes.line_block]
+    allowed_child_node_types = Section.allowed_child_node_types + \
+        [docutils.nodes.line_block]
     required_child_node_types = [docutils.nodes.line_block]
 
     def render(self, func):
@@ -800,7 +837,8 @@ class References(Section):
     def parse(cls, node):
         section = super(References, cls).parse(node)
         for item in node.children[1:]:
-            if not isinstance(item, docutils.nodes.line_block):
+            if not isinstance(item, (docutils.nodes.line_block,
+                                     docutils.nodes.comment)):
                 logger.info("Skipping unknown node in %s section '%s': %s" %
                             (cls.type, section.name.astext(), item))
                 continue
@@ -808,7 +846,7 @@ class References(Section):
         return section
 
 
-class Document(list):
+class Document(list, Parseable):
     """ Every dmr resume must start with a top-level title that
     contains the full name of the person whose resume it is.  For
     example:
@@ -839,6 +877,12 @@ class Document(list):
         :type sections: list of :class:`dmr.data.Section` subclass
                         objects
         """
+        if sections is None:
+            list.__init__(self, [])
+        else:
+            list.__init__(self, sections)
+        Parseable.__init__(self)
+
         #: The contact for the resume (i.e., the person whose resume
         #: it is), as a :class:`dmr.data.Contact`.
         self.contact = contact
@@ -847,10 +891,30 @@ class Document(list):
         #: original doctree.
         self.source = source
 
-        if sections is None:
-            list.__init__(self, [])
-        else:
-            list.__init__(self, sections)
+    @classmethod
+    def parse(cls, node):
+        doc = cls()
+        doc.contact = Contact.parse(node)
+
+        for data in node.children:
+            if not isinstance(data, docutils.nodes.Structural):
+                if not isinstance(data, (docutils.nodes.line_block,
+                                         docutils.nodes.Titular,
+                                         docutils.nodes.comment)):
+                    logger.info("Skipping unknown node %s" % data)
+                continue
+
+            if exclude(data):
+                logger.debug("Skipping excluded section %s" % get_title(data))
+                continue
+
+            for sectiontype in sections:
+                if sectiontype.is_valid(data):
+                    doc.append(sectiontype.parse(data))
+                    break
+            else:
+                logger.info("Skipping unknown section %s" % get_title(data))
+        return doc
 
     @property
     def sections(self):

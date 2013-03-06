@@ -21,6 +21,7 @@ __all__ = ["Html"]
 class Html(BaseOutput):
     """ dmr output format class to write HTML output using the
     :mod:`docutils HTML translator <docutils.writers.html4css1>`."""
+    name = "HTML"
 
     def output(self):
         writer = Writer()

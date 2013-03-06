@@ -118,7 +118,7 @@ from itertools import chain
 \begin{center}
   {\Large \scshape {${contact.name}}}\ \smallskip
   {% for line in chain(*contact[1:]) %}
-    {${line}}\ \smallskip
+    {${line}}
   {% end %}
 \end{center}
 

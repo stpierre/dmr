@@ -22,6 +22,7 @@ class Json(BaseOutput):
     """ dmr output format class to write JSON output.  Note that this
     output format is lossy; text formatting (e.g., emphasis, etc.) is
     discarded. """
+    name = "JSON"
 
     def __init__(self, document):
         BaseOutput.__init__(self, document)

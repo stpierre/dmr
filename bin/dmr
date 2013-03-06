@@ -13,7 +13,7 @@ from dmr.logger import logger
 def main():
     config = dmr.config.parse()
     output = config.output_class(dmr.input.parse(config.infile))
-    logger.debug("Writing output with %s" % output.__class__.__name__)
+    logger.debug("Writing output with %s" % output.name)
     logger.info("Writing output to %s" % config.outfile.name)
     config.outfile.write(output.output())
 
