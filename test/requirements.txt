@@ -1,3 +1,6 @@
 nose
 genshi
 argparse
+docutils
+pylint
+pep8
