@@ -112,8 +112,8 @@ def _get_footer():
     :returns: :class:`docutils.nodes.container`
     """
     return docutils.nodes.container(
-            '', docutils.nodes.Text("Generated with "),
-            docutils.nodes.reference('', config.name, refuri=config.uri))
+        '', docutils.nodes.Text("Generated with "),
+        docutils.nodes.reference('', config.name, refuri=config.uri))
 
 
 class DMROption(object):
@@ -198,57 +198,57 @@ def options():
     circular imports. """
     import dmr.output  # pylint: disable=W0621
     if not _OPTIONS:
-        _OPTIONS.extend([
-                DMROption("-c", "--config",
-                          help="Specify a config file",
-                          default="/etc/dmr.conf"),
-                DMROption("--footer",
-                          help="Include a dmr footer in the document",
-                          default=False,
-                          action='store_const',
-                          const=_get_footer(),
-                          cf=('global', 'footer'),
-                          inline='footer'),
-                DMROption("--no-footer",
-                          help="Exclude the dmr footer from the document",
-                          action=UnsetAction,
-                          inline='no-footer'),
-                DMROption(
+        _OPTIONS.extend(
+            [DMROption("-c", "--config",
+                       help="Specify a config file",
+                       default="/etc/dmr.conf"),
+             DMROption("--footer",
+                       help="Include a dmr footer in the document",
+                       default=False,
+                       action='store_const',
+                       const=_get_footer(),
+                       cf=('global', 'footer'),
+                       inline='footer'),
+             DMROption("--no-footer",
+                       help="Exclude the dmr footer from the document",
+                       action=UnsetAction,
+                       inline='no-footer'),
+             DMROption(
                     "--exclude",
                     help="Exclude the named section from the final document",
                     action='append',
                     default=[],
                     cf=('global', 'exclude'),
                     inline='exclude'),
-                DMROption(
+             DMROption(
                     "--include",
                     help="Include the named section in the final document",
                     action='append',
                     default=[],
                     cf=('global', 'include'),
                     inline='include'),
-                DMROption("-v", "--verbose",
-                          help="Be verbose",
-                          action='count',
-                          cf=('global', 'verbose')),
-                DMROption("-f", "--format",
-                          help="Output format",
-                          default="html",
-                          choices=[m.rsplit('.', 1)[-1]
-                                   for m in dmr.output.__all__],
-                          cf=('global', 'output_format')),
-                DMROption("infile",
-                          help="Input filename, or - to read from stdin",
-                          default=sys.stdin,
-                          nargs='?',
-                          type=argparse.FileType('r'),
-                          cf=('global', 'infile')),
-                DMROption("-o", "--outfile",
-                          help="Output filename, or - to write to stdout",
-                          default=sys.stdout,
-                          nargs='?',
-                          type=argparse.FileType('w'),
-                          cf=('global', 'outfile'))])
+             DMROption("-v", "--verbose",
+                       help="Be verbose",
+                       action='count',
+                       cf=('global', 'verbose')),
+             DMROption("-f", "--format",
+                       help="Output format",
+                       default="html",
+                       choices=[m.rsplit('.', 1)[-1]
+                                for m in dmr.output.__all__],
+                       cf=('global', 'output_format')),
+             DMROption("infile",
+                       help="Input filename, or - to read from stdin",
+                       default=sys.stdin,
+                       nargs='?',
+                       type=argparse.FileType('r'),
+                       cf=('global', 'infile')),
+             DMROption("-o", "--outfile",
+                       help="Output filename, or - to write to stdout",
+                       default=sys.stdout,
+                       nargs='?',
+                       type=argparse.FileType('w'),
+                       cf=('global', 'outfile'))])
     return _OPTIONS
 
 

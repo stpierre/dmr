@@ -31,8 +31,8 @@ class Html(BaseOutput):
         mydoc.settings = \
             OptionParser(components=(Writer,)).get_default_values()
         if config.footer:
-            mydoc.append(docutils.nodes.footer(
-                    config.footer,
-                    docutils.nodes.Text(config.footer)))
+            mydoc.append(
+                docutils.nodes.footer(config.footer,
+                                      docutils.nodes.Text(config.footer)))
 
         return writer.write(mydoc, output)

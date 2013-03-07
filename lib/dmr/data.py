@@ -575,8 +575,8 @@ class Section(list, Renderable, Parseable):
         :type node: docutils.nodes.Node
         :returns: bool """
         return (all(any(isinstance(el, nodecls)
-                       for nodecls in cls.allowed_child_node_types)
-                   for el in node.children[1:]) and
+                        for nodecls in cls.allowed_child_node_types)
+                    for el in node.children[1:]) and
                 all(node.first_child_matching_class(nodecls) is not None
                     for nodecls in cls.required_child_node_types))
 
@@ -923,7 +923,7 @@ class Document(list, Parseable):
 
     def __repr__(self):
         return "%s(%s): %s" % (self.__class__.__name__, self.contact,
-                             self.sections)
+                               self.sections)
 
     def index(self, val):
         try:

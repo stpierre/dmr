@@ -44,7 +44,7 @@ class TestCodeChecks(TestCase):
 
     def test_pep8(self):
         """ Check code for pep8 problems """
-        args = ["pep8"] + self.get_filelist()
+        args = ["pep8", "--ignore=E125"] + self.get_filelist()
         print "running: %s" % args
         pep8 = Popen(args, stdout=PIPE, stderr=STDOUT, env=self.get_env())
         print(pep8.communicate()[0])

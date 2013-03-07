@@ -27,11 +27,11 @@ def setup_logging(verbose=0):
     elif verbose > 1:
         level = logging.DEBUG
         if verbose > 2:
-            stderr.setFormatter(logging.Formatter(
-                    "%(asctime)s: %(levelname)s: %(message)s"))
+            stderr.setFormatter(
+                logging.Formatter("%(asctime)s: %(levelname)s: %(message)s"))
         else:
-            stderr.setFormatter(logging.Formatter(
-                    "%(levelname)s: %(message)s"))
+            stderr.setFormatter(
+                logging.Formatter("%(levelname)s: %(message)s"))
     logger.setLevel(level)
     logger.addHandler(stderr)
     syslog = logging.handlers.SysLogHandler("/dev/log")
