@@ -67,12 +67,7 @@ import argparse
 import dmr.version
 from dmr.logger import setup_logging, logger
 import docutils.nodes
-# pylint: disable=F0401
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-# pylint: enable=F0401
+import ConfigParser
 
 
 __all__ = ["config", "parse", "options", "DMROption"]
@@ -173,7 +168,7 @@ class DMROption(object):
             for val in shlex.split(cfp.get(*self.cf)):
                 self.parse_value(val)
         except (TypeError,  # self.cf is None
-                configparser.NoSectionError, configparser.NoOptionError):
+                ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             pass
 
     def parse_value(self, value):
@@ -311,7 +306,7 @@ def parse(argv=None):
     bootstrap = _get_parser().parse_known_args(namespace=config)[0]
 
     # phase 2: read config files
-    cfp = configparser.SafeConfigParser()
+    cfp = ConfigParser.SafeConfigParser()
     cfp.read([bootstrap.config, os.path.expanduser('~/.dmr/config')])
     for opt in options():
         opt.from_config(cfp)
