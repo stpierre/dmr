@@ -49,3 +49,11 @@ class TestCodeChecks(TestCase):
         pep8 = Popen(args, stdout=PIPE, stderr=STDOUT, env=self.get_env())
         print(pep8.communicate()[0])
         self.assertEqual(pep8.wait(), 0)
+
+    def test_pyflakes(self):
+        """ Check code for pyflakes problems """
+        args = ["pyflakes"] + self.get_filelist()
+        print "running: %s" % args
+        pyflakes = Popen(args, stdout=PIPE, stderr=STDOUT, env=self.get_env())
+        print(pyflakes.communicate()[0])
+        self.assertEqual(pyflakes.wait(), 0)
