@@ -4,3 +4,4 @@ argparse
 docutils
 pylint
 pep8
+pyflakes
