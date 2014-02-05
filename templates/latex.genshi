@@ -10,6 +10,7 @@ from itertools import chain
 \usepackage{amssymb}
 \usepackage[usenames]{color}
 \usepackage{ifthen}
+\usepackage{t1enc}
 {% if footer %}
 \usepackage{fancyhdr}
 {% end %}
@@ -18,6 +19,7 @@ from itertools import chain
 \usepackage{mathptmx} % Times
 \usepackage[scaled=.90]{helvet}
 \usepackage{courier}
+\let\textquotedbl="
 
 \leftmargin=0.25in
 \oddsidemargin=0.25in
